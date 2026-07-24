@@ -14,7 +14,7 @@ const app = express();
 // CORS
 const allowedOrigins = (
   process.env.CLIENT_ORIGIN ||
-  "http://localhost:3000,http://localhost:3001,http://localhost:3002"
+  "http://localhost:3000"
 )
   .split(",")
   .map((o) => o.trim());
