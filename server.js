@@ -11,8 +11,10 @@ const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 
+// CORS
 const allowedOrigins = (
-  process.env.CLIENT_ORIGIN || "http://localhost:3000,http://localhost:3001,http://localhost:3002"
+  process.env.CLIENT_ORIGIN ||
+  "http://localhost:3000,http://localhost:3001,http://localhost:3002"
 )
   .split(",")
   .map((o) => o.trim());
@@ -23,50 +25,48 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
+      callback(new Error(`CORS blocked for origin: ${origin}`));
     },
   })
 );
+
 app.use(express.json());
 
-app.get("/", (req, res) => res.send("Shikshaa CRM Backend is running ✅"));
-app.get("/api/health", (req, res) => res.json({ status: "ok" }));
+// MongoDB Connection
+async function connectDB() {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
 
+    console.log("✅ MongoDB Connected");
+  } catch (err) {
+    console.error("❌ MongoDB Connection Error:", err.message);
+    process.exit(1);
+  }
+}
+
+// Health Check
+app.get("/", (req, res) => {
+  res.send("Shikshaa CRM Backend is running ✅");
+});
+
+app.get("/api/health", (req, res) => {
+  res.json({ status: "ok" });
+});
+
+// Routes
 app.use("/api/students", studentRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/export", exportRoutes);
 app.use("/api/otp", otpRoutes);
 app.use("/api/payments", paymentRoutes);
 
-const MONGO_URI = process.env.MONGO_URI;
+// Start Server
+const PORT = process.env.PORT || 5000;
 
-let isConnected = false;
-async function connectDB() {
-  if (isConnected) return;
-  if (!MONGO_URI) throw new Error("MONGO_URI is not set");
-  await mongoose.connect(MONGO_URI);
-  isConnected = true;
-  console.log("MongoDB connected");
-}
-
-app.use(async (req, res, next) => {
-  try {
-    await connectDB();
-    next();
-  } catch (err) {
-    console.error("MongoDB connection error:", err.message);
-    res.status(500).json({ error: "Database connection failed" });
-  }
+connectDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
 });
-
-if (require.main === module) {
-  const PORT = process.env.PORT || 5000;
-  connectDB()
-    .then(() => app.listen(PORT, () => console.log(`Shikshaa CRM API running on port ${PORT}`)))
-    .catch((err) => {
-      console.error("Failed to start server:", err.message);
-      process.exit(1);
-    });
-}
 
 module.exports = app;
