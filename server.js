@@ -11,13 +11,13 @@ const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 
-// CORS
-const allowedOrigins = (
-  process.env.CLIENT_ORIGIN ||
-  "https://shikshaafrontend.vercel.app"
-)
-  .split(",")
-  .map((o) => o.trim());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:5174',
+  process.env.CLIENT_URL,
+  process.env.CLIENT_URL_2,
+].filter(Boolean);
 
 app.use(
   cors({
