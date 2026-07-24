@@ -14,19 +14,22 @@ const app = express();
 // CORS
 const allowedOrigins = (
   process.env.CLIENT_ORIGIN ||
-  "http://localhost:3000"
+  "http://localhost:3000,https://shikshaafrontend.vercel.app"
 )
   .split(",")
   .map((o) => o.trim());
 
 app.use(
   cors({
-    origin: (origin, callback) => {
+    origin(origin, callback) {
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
-      callback(new Error(`CORS blocked for origin: ${origin}`));
+
+      console.log("Blocked Origin:", origin);
+      callback(new Error("Not allowed by CORS"));
     },
+    credentials: true,
   })
 );
 
