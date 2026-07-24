@@ -14,7 +14,7 @@ const app = express();
 // CORS
 const allowedOrigins = (
   process.env.CLIENT_ORIGIN ||
-  "http://localhost:3000,https://shikshaafrontend.vercel.app"
+  "https://shikshaafrontend.vercel.app"
 )
   .split(",")
   .map((o) => o.trim());
@@ -64,12 +64,6 @@ app.use("/api/otp", otpRoutes);
 app.use("/api/payments", paymentRoutes);
 
 // Start Server
-const PORT = process.env.PORT || 5000;
-
-connectDB().then(() => {
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-  });
-});
+connectDB();
 
 module.exports = app;
